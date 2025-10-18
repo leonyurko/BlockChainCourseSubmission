@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MetaMask Test</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .status {
+            padding: 20px;
+            margin: 20px 0;
+            border-radius: 10px;
+            background: white;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .success { border-left: 5px solid green; }
+        .error { border-left: 5px solid red; }
+        .warning { border-left: 5px solid orange; }
+        button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px 5px;
+        }
+        button:hover { background: #45a049; }
+        pre {
+            background: #333;
+            color: #0f0;
+            padding: 15px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🦊 MetaMask Detection Test</h1>
+    
+    <div id="detection" class="status warning">
+        <h3>Checking for MetaMask...</h3>
+    </div>
+
+    <button onclick="checkMetaMask()">🔍 Check MetaMask</button>
+    <button onclick="connectWallet()">🔗 Connect Wallet</button>
+    <button onclick="checkNetwork()">🌐 Check Network</button>
+
+    <div id="info" style="margin-top: 20px;"></div>
+
+    <h3>Console Output:</h3>
+    <pre id="console"></pre>
+
+    <script>
+        let log = [];
+        function addLog(msg, color = '#0f0') {
+            log.push(msg);
+            const consoleEl = document.getElementById('console');
+            consoleEl.innerHTML += `<span style="color:${color}">${msg}</span>\n`;
+            console.log(msg);
+        }
+
+        function checkMetaMask() {
+            const detectionEl = document.getElementById('detection');
+            addLog('=== CHECKING METAMASK ===', '#fff');
+            
+            addLog(`window.ethereum exists: ${typeof window.ethereum !== 'undefined'}`);
+            addLog(`window.ethereum value: ${window.ethereum}`);
+            
+            if (typeof window.ethereum !== 'undefined') {
+                detectionEl.className = 'status success';
+                detectionEl.innerHTML = '<h3>✅ MetaMask Detected!</h3><p>MetaMask is installed and ready.</p>';
+                
+                addLog(`MetaMask Provider: ${window.ethereum.isMetaMask ? 'Yes' : 'Unknown'}`);
+                addLog(`Chain ID: ${window.ethereum.chainId || 'Not available'}`);
+                addLog(`Selected Address: ${window.ethereum.selectedAddress || 'None (not connected)'}`);
+            } else {
+                detectionEl.className = 'status error';
+                detectionEl.innerHTML = '<h3>❌ MetaMask Not Detected</h3><p>Please install MetaMask extension.</p>';
+                addLog('MetaMask is NOT installed or not detected', '#f00');
+            }
+        }
+
+        async function connectWallet() {
+            addLog('\n=== CONNECTING WALLET ===', '#fff');
+            
+            if (typeof window.ethereum === 'undefined') {
+                alert('MetaMask is not installed!');
+                addLog('ERROR: MetaMask not found', '#f00');
+                return;
+            }
+
+            try {
+                addLog('Requesting accounts...');
+                const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+                
+                addLog(`✅ Connected! Account: ${accounts[0]}`, '#0f0');
+                
+                const infoEl = document.getElementById('info');
+                infoEl.innerHTML = `
+                    <div class="status success">
+                        <h3>✅ Connected Successfully!</h3>
+                        <p><strong>Address:</strong> ${accounts[0]}</p>
+                    </div>
+                `;
+            } catch (error) {
+                addLog(`❌ Connection failed: ${error.message}`, '#f00');
+                alert('Connection failed: ' + error.message);
+            }
+        }
+
+        async function checkNetwork() {
+            addLog('\n=== CHECKING NETWORK ===', '#fff');
+            
+            if (typeof window.ethereum === 'undefined') {
+                addLog('ERROR: MetaMask not found', '#f00');
+                return;
+            }
+
+            try {
+                const chainId = await window.ethereum.request({ method: 'eth_chainId' });
+                addLog(`Current Chain ID: ${chainId} (${parseInt(chainId, 16)})`);
+                
+                if (parseInt(chainId, 16) === 31337) {
+                    addLog('✅ Connected to Localhost (31337)!', '#0f0');
+                } else {
+                    addLog('⚠️ NOT on localhost network. Please switch to Localhost 8545 (Chain ID: 31337)', '#ff0');
+                }
+            } catch (error) {
+                addLog(`❌ Error: ${error.message}`, '#f00');
+            }
+        }
+
+        // Auto-check on load
+        window.addEventListener('load', () => {
+            addLog('Page loaded, checking MetaMask...', '#fff');
+            setTimeout(checkMetaMask, 500);
+        });
+    </script>
+</body>
+</html>

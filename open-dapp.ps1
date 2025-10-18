@@ -1,0 +1,40 @@
+# Quick DApp Launcher Script
+# This script opens the DApp in Chrome (or default browser) with a local server
+
+Write-Host "Starting DApp..." -ForegroundColor Cyan
+
+# Navigate to frontend directory
+Set-Location "c:\Users\Leon\Desktop\blockchainProject\frontend"
+
+Write-Host "Starting local HTTP server on port 8000..." -ForegroundColor Yellow
+
+# Start HTTP server in background
+Start-Process powershell -ArgumentList '-NoExit', '-Command', "Write-Host 'HTTP Server Running on http://localhost:8000' -ForegroundColor Green; Write-Host 'Press Ctrl+C to stop' -ForegroundColor Yellow; npx http-server -p 8000"
+
+# Wait a moment for server to start
+Start-Sleep -Seconds 3
+
+Write-Host "Opening DApp in browser..." -ForegroundColor Green
+
+# Try to open in Chrome first, then fall back to default browser
+$chromePath = "C:\Program Files\Google\Chrome\Application\chrome.exe"
+if (Test-Path $chromePath) {
+    Start-Process $chromePath -ArgumentList "http://localhost:8000"
+    Write-Host "Opened in Chrome" -ForegroundColor Green
+} else {
+    Start-Process "http://localhost:8000"
+    Write-Host "Opened in default browser" -ForegroundColor Green
+}
+
+Write-Host ""
+Write-Host "================================================" -ForegroundColor Magenta
+Write-Host "DApp is now running at: http://localhost:8000" -ForegroundColor Cyan
+Write-Host "================================================" -ForegroundColor Magenta
+Write-Host ""
+Write-Host "Next Steps:" -ForegroundColor Yellow
+Write-Host "   1. Install MetaMask extension (https://metamask.io)" -ForegroundColor White
+Write-Host "   2. Add Localhost network (Chain ID: 31337)" -ForegroundColor White
+Write-Host "   3. Import test account with private key from RUNNING_STATUS.md" -ForegroundColor White
+Write-Host "   4. Connect wallet in the DApp" -ForegroundColor White
+Write-Host ""
+Write-Host "See METAMASK_TROUBLESHOOTING.md for detailed help" -ForegroundColor Cyan

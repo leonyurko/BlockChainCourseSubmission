@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>DApp Final Project - Royalty NFT</title>
+    <!-- Tailwind CSS for styling -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- Ethers.js for Web3 communication -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.umd.min.js"></script>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;700&display=swap');
+        body {
+            font-family: 'Inter', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+        .card {
+            background-color: #ffffff;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+            backdrop-filter: blur(10px);
+        }
+        .btn {
+            transition: all 0.3s ease;
+        }
+        .btn:hover:not(:disabled) {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        }
+        .btn:active:not(:disabled) {
+            transform: translateY(0);
+        }
+        .gradient-text {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+    </style>
+</head>
+<body class="p-4 sm:p-8">
+    <div class="max-w-3xl mx-auto space-y-8">
+        <header class="text-center mb-8">
+            <h1 class="text-4xl font-bold text-white mb-2">🎨 Royalty NFT DApp</h1>
+            <p class="text-white text-opacity-90">Connect Metamask to manage NFT transfers with automatic 10% royalty payments</p>
+        </header>
+
+        <!-- Connection Status -->
+        <div id="connection-card" class="card p-6 rounded-2xl border-2 border-blue-300">
+            <h2 class="text-2xl font-semibold text-blue-700 mb-4 flex items-center">
+                <span class="mr-2">🔐</span> Step 1: Metamask Connection
+            </h2>
+            <p id="wallet-status" class="mb-4 text-red-500 font-medium">Please connect your Metamask wallet...</p>
+            <button id="connect-btn" onclick="connectWallet()" class="btn w-full bg-gradient-to-r from-blue-500 to-blue-700 text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-xl">
+                Connect Wallet
+            </button>
+            <div class="mt-4 p-3 bg-gray-50 rounded-lg">
+                <p class="text-sm text-gray-600">Connected Address:</p>
+                <p id="user-address" class="font-mono text-sm text-gray-900 break-all mt-1">N/A</p>
+            </div>
+        </div>
+
+        <!-- Mint NFT Section -->
+        <div id="mint-card" class="card p-6 rounded-2xl border-2 border-yellow-300 hidden">
+            <h2 class="text-2xl font-semibold text-yellow-700 mb-4 flex items-center">
+                <span class="mr-2">✨</span> Step 2: Mint Your NFT
+            </h2>
+            <div class="space-y-4">
+                <p class="text-gray-600">Mint a new NFT to your address. This is free (just gas fees).</p>
+                <button id="mint-btn" onclick="mintNft()" class="btn w-full bg-gradient-to-r from-yellow-400 to-yellow-600 text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-xl">
+                    🎨 Mint New NFT
+                </button>
+                <div id="mint-message" class="hidden p-3 rounded-lg text-center font-medium"></div>
+            </div>
+        </div>
+
+        <!-- NFT Interaction -->
+        <div id="nft-interaction-card" class="card p-6 rounded-2xl border-2 border-green-300 hidden">
+            <h2 class="text-2xl font-semibold text-green-700 mb-4 flex items-center">
+                <span class="mr-2">💸</span> Step 3: Transfer NFT with 10% Royalty
+            </h2>
+
+            <div class="space-y-4">
+                <!-- Token ID Input -->
+                <div>
+                    <label for="tokenIdInput" class="block text-sm font-semibold text-gray-700 mb-2">Token ID to Transfer:</label>
+                    <input type="number" id="tokenIdInput" placeholder="e.g., 0" class="w-full rounded-lg border-2 border-gray-300 shadow-sm p-3 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition">
+                </div>
+
+                <!-- Recipient Address Input -->
+                <div>
+                    <label for="toAddressInput" class="block text-sm font-semibold text-gray-700 mb-2">Recipient Address (To):</label>
+                    <input type="text" id="toAddressInput" placeholder="0x..." class="w-full rounded-lg border-2 border-gray-300 shadow-sm p-3 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition">
+                </div>
+                
+                <!-- ETH Value Input for Royalty -->
+                <div>
+                    <label for="ethValueInput" class="block text-sm font-semibold text-gray-700 mb-2">ETH Value to Send (Must cover 10% Royalty):</label>
+                    <input type="number" step="any" id="ethValueInput" value="0.01" class="w-full rounded-lg border-2 border-gray-300 shadow-sm p-3 focus:ring-2 focus:ring-green-500 focus:border-green-500 transition">
+                    <p class="text-xs text-gray-500 mt-2">💡 Example: Sending 0.01 ETH = 0.001 ETH royalty to creator</p>
+                </div>
+
+                <!-- Transfer Button -->
+                <button id="transfer-btn" onclick="transferNft()" class="btn w-full bg-gradient-to-r from-green-500 to-green-700 text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-xl disabled:opacity-50 disabled:cursor-not-allowed" disabled>
+                    🚀 Execute NFT Transfer + Royalty Payment
+                </button>
+            </div>
+            
+            <div id="result-message" class="mt-4 p-3 rounded-lg hidden text-center font-medium"></div>
+        </div>
+        
+        <!-- Previous Owner Check -->
+        <div id="owner-memory-card" class="card p-6 rounded-2xl border-2 border-purple-300">
+            <h2 class="text-2xl font-semibold text-purple-700 mb-4 flex items-center">
+                <span class="mr-2">🔍</span> Check Previous Owner (Memory)
+            </h2>
+            <div class="flex flex-col sm:flex-row gap-3">
+                <input type="number" id="checkTokenId" placeholder="Token ID to check" class="w-full sm:w-2/3 rounded-lg border-2 border-gray-300 shadow-sm p-3 focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition">
+                <button onclick="getPreviousOwner()" class="btn w-full sm:w-1/3 bg-gradient-to-r from-purple-500 to-purple-700 text-white py-3 rounded-xl font-bold shadow-lg hover:shadow-xl">
+                    Check
+                </button>
+            </div>
+            <div id="previous-owner-result" class="mt-4 p-3 bg-purple-50 rounded-lg text-sm text-gray-700 font-mono break-all hidden"></div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="text-center text-white text-opacity-80 text-sm py-4">
+            <p>Built with ❤️ using Solidity, Ethers.js & Tailwind CSS</p>
+        </footer>
+    </div>
+
+    <script>
+        // === CONTRACT CONFIGURATION - UPDATE THESE AFTER DEPLOYMENT ===
+        // **ACTION REQUIRED:** REPLACE THIS WITH YOUR DEPLOYED NFT CONTRACT ADDRESS
+        const NFT_CONTRACT_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; 
+        
+        // **ACTION REQUIRED:** REPLACE THIS WITH THE FULL ABI ARRAY OF THE RoyaltyNFT CONTRACT
+        // (Simplified ABI for required functions only)
+        const NFT_ABI = [
+            {"inputs":[],"stateMutability":"nonpayable","type":"constructor"},
+            {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"from","type":"address"},{"indexed":true,"internalType":"address","name":"to","type":"address"},{"indexed":true,"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"Transfer","type":"event"},
+            {"anonymous":false,"inputs":[{"indexed":true,"internalType":"address","name":"creator","type":"address"},{"indexed":false,"internalType":"uint256","name":"amount","type":"uint256"}],"name":"RoyaltyPaid","type":"event"},
+            {"inputs":[{"internalType":"address","name":"to","type":"address"}],"name":"mint","outputs":[{"internalType":"uint256","name":"","type":"uint256"}],"stateMutability":"nonpayable","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"ownerOf","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"},
+            {"inputs":[{"internalType":"address","name":"from","type":"address"},{"internalType":"address","name":"to","type":"address"},{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"transferFrom","outputs":[],"stateMutability":"payable","type":"function"},
+            {"inputs":[{"internalType":"uint256","name":"tokenId","type":"uint256"}],"name":"previousOwners","outputs":[{"internalType":"address","name":"","type":"address"}],"stateMutability":"view","type":"function"}
+        ];
+        // =============================================================
+
+        let provider;
+        let signer;
+        let userAddress;
+        let nftContract;
+
+        /**
+         * Utility function to display messages on the UI
+         * @param {string} message - The message to display
+         * @param {string} type - 'success', 'error', or 'info'
+         * @param {string} elementId - The ID of the element to show the message in
+         */
+        function showMessage(message, type, elementId = 'result-message') {
+            const msgElement = document.getElementById(elementId);
+            msgElement.textContent = message;
+            msgElement.classList.remove('hidden', 'bg-red-100', 'text-red-800', 'bg-green-100', 'text-green-800', 'bg-blue-100', 'text-blue-800');
+            
+            if (type === 'success') {
+                msgElement.classList.add('bg-green-100', 'text-green-800');
+            } else if (type === 'error') {
+                msgElement.classList.add('bg-red-100', 'text-red-800');
+            } else {
+                msgElement.classList.add('bg-blue-100', 'text-blue-800');
+            }
+        }
+
+        /**
+         * Connects to Metamask wallet and initializes Ethers provider/signer/contract.
+         */
+        async function connectWallet() {
+            // Wait for MetaMask to be ready
+            if (typeof window.ethereum === 'undefined') {
+                document.getElementById('wallet-status').textContent = "⚠️ MetaMask is not detected. Please make sure it's installed and enabled.";
+                document.getElementById('wallet-status').classList.remove('text-green-600');
+                document.getElementById('wallet-status').classList.add('text-red-500');
+                return;
+            }
+
+            try {
+                document.getElementById('wallet-status').textContent = "🔄 Connecting to MetaMask...";
+                document.getElementById('wallet-status').classList.remove('text-red-500', 'text-green-600');
+                document.getElementById('wallet-status').classList.add('text-blue-500');
+                
+                provider = new ethers.BrowserProvider(window.ethereum);
+                const accounts = await provider.send("eth_requestAccounts", []);
+                signer = await provider.getSigner();
+                userAddress = accounts[0];
+                
+                // Initialize the NFT Contract instance
+                nftContract = new ethers.Contract(NFT_CONTRACT_ADDRESS, NFT_ABI, signer);
+
+                // Update UI status
+                const network = await provider.getNetwork();
+                document.getElementById('wallet-status').textContent = `✅ Connected successfully! Chain ID: ${network.chainId}`;
+                document.getElementById('wallet-status').classList.remove('text-red-500');
+                document.getElementById('wallet-status').classList.add('text-green-600');
+                document.getElementById('connect-btn').disabled = true;
+                document.getElementById('connect-btn').textContent = '✅ Connected';
+                document.getElementById('connect-btn').classList.remove('from-blue-500', 'to-blue-700');
+                document.getElementById('connect-btn').classList.add('from-green-500', 'to-green-700');
+                document.getElementById('user-address').textContent = userAddress;
+
+                document.getElementById('mint-card').classList.remove('hidden');
+                document.getElementById('nft-interaction-card').classList.remove('hidden');
+                document.getElementById('transfer-btn').disabled = false;
+                
+            } catch (error) {
+                console.error("Error connecting wallet:", error);
+                document.getElementById('wallet-status').textContent = "❌ Connection failed. Please check Metamask permissions.";
+            }
+        }
+
+        /**
+         * Mints a new NFT to the connected user's address
+         */
+        async function mintNft() {
+            if (!nftContract) {
+                showMessage("Please connect your wallet first.", 'error', 'mint-message');
+                return;
+            }
+
+            try {
+                document.getElementById('mint-message').classList.remove('hidden');
+                showMessage("Sending mint transaction to Metamask. Please confirm...", 'info', 'mint-message');
+                
+                const tx = await nftContract.mint(userAddress);
+                showMessage(`Transaction sent! Waiting for confirmation... Hash: ${tx.hash.substring(0, 10)}...`, 'info', 'mint-message');
+                
+                const receipt = await tx.wait();
+                
+                // Extract token ID from Transfer event
+                const transferEvent = receipt.logs.find(log => {
+                    try {
+                        return nftContract.interface.parseLog(log).name === 'Transfer';
+                    } catch {
+                        return false;
+                    }
+                });
+                
+                let tokenId = 'new token';
+                if (transferEvent) {
+                    const parsedLog = nftContract.interface.parseLog(transferEvent);
+                    tokenId = parsedLog.args.tokenId.toString();
+                }
+                
+                showMessage(`✅ NFT minted successfully! Token ID: ${tokenId}`, 'success', 'mint-message');
+                
+            } catch (error) {
+                console.error("Error minting NFT:", error);
+                const errorMessage = error.reason || error.message || "Unknown error during minting.";
+                showMessage(`❌ Minting failed: ${errorMessage}`, 'error', 'mint-message');
+            }
+        }
+        
+        /**
+         * Executes the NFT transfer, including the ETH value required for the 10% royalty.
+         */
+        async function transferNft() {
+            const tokenId = document.getElementById('tokenIdInput').value;
+            const toAddress = document.getElementById('toAddressInput').value;
+            const ethValue = document.getElementById('ethValueInput').value;
+
+            if (!nftContract || !tokenId || !toAddress || !ethValue) {
+                showMessage("Please fill in all required fields.", 'error');
+                return;
+            }
+            
+            try {
+                // Ensure user owns the token (optional, contract will check)
+                const currentOwner = await nftContract.ownerOf(tokenId);
+                if (currentOwner.toLowerCase() !== userAddress.toLowerCase()) {
+                    showMessage(`You are not the owner of Token ID ${tokenId}. Current owner: ${currentOwner}`, 'error');
+                    return;
+                }
+
+                // Convert ETH value (for royalty payment) to Wei
+                const valueInWei = ethers.parseEther(ethValue);
+
+                showMessage("Sending transaction request to Metamask. Please confirm the transaction...", 'info');
+                
+                // Call transferFrom with the value attached (msg.value in Solidity)
+                const tx = await nftContract.transferFrom(userAddress, toAddress, tokenId, {
+                    value: valueInWei
+                });
+
+                showMessage(`Transaction sent. Waiting for confirmation... Hash: ${tx.hash.substring(0, 10)}...`, 'info');
+
+                // Wait for the transaction to be mined
+                await tx.wait();
+
+                showMessage(`✅ NFT ID ${tokenId} transferred successfully! Royalty paid.`, 'success');
+                
+            } catch (error) {
+                console.error("Error during transfer:", error);
+                const errorMessage = error.reason || error.message || "Unknown error during token transfer.";
+                showMessage(`❌ Transfer failed: ${errorMessage}`, 'error');
+            }
+        }
+        
+        /**
+         * Retrieves and displays the address of the previous owner for the given token ID.
+         */
+        async function getPreviousOwner() {
+            const checkTokenId = document.getElementById('checkTokenId').value;
+            const resultElement = document.getElementById('previous-owner-result');
+
+            if (!nftContract || !checkTokenId) {
+                resultElement.textContent = "Please enter a valid Token ID.";
+                resultElement.classList.remove('hidden');
+                return;
+            }
+
+            try {
+                const prevOwner = await nftContract.previousOwners(checkTokenId);
+                
+                resultElement.classList.remove('hidden');
+                if (prevOwner === "0x0000000000000000000000000000000000000000") {
+                    resultElement.textContent = `Token ID ${checkTokenId} has no recorded previous owner (likely the initial mint).`;
+                } else {
+                    resultElement.textContent = `✅ Previous Owner of Token ID ${checkTokenId}: ${prevOwner}`;
+                }
+            } catch (error) {
+                console.error("Error retrieving previous owner:", error);
+                resultElement.classList.remove('hidden');
+                resultElement.textContent = "❌ Error reading contract data. Ensure the contract address and token ID are valid.";
+            }
+        }
+
+        // Wait for page and MetaMask to be fully loaded
+        window.addEventListener('load', async () => {
+            // Give MetaMask a moment to inject
+            if (typeof window.ethereum !== 'undefined') {
+                console.log('✅ MetaMask detected!');
+                // Don't auto-connect, let user click the button
+                document.getElementById('wallet-status').textContent = "Ready to connect. Click the button below.";
+                document.getElementById('wallet-status').classList.add('text-blue-500');
+            } else {
+                console.log('❌ MetaMask not detected');
+                document.getElementById('wallet-status').textContent = "⚠️ MetaMask not detected. Please install it from https://metamask.io";
+                
+                // Try again after a delay (MetaMask might still be loading)
+                setTimeout(() => {
+                    if (typeof window.ethereum !== 'undefined') {
+                        console.log('✅ MetaMask detected after delay!');
+                        document.getElementById('wallet-status').textContent = "Ready to connect. Click the button below.";
+                        document.getElementById('wallet-status').classList.remove('text-red-500');
+                        document.getElementById('wallet-status').classList.add('text-blue-500');
+                    }
+                }, 1000);
+            }
+        });
+
+    </script>
+</body>
+</html>
