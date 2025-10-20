@@ -16,14 +16,36 @@ if (-not (Test-Path "frontend")) {
     exit 1
 }
 
+# Check if node_modules exists
+if (-not (Test-Path "node_modules")) {
+    Write-Host "Installing dependencies..." -ForegroundColor Yellow
+    npm install
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Error: Failed to install dependencies" -ForegroundColor Red
+        pause
+        exit 1
+    }
+}
+
+# Check if hardhat is installed
+if (-not (Test-Path "node_modules\.bin\hardhat.cmd")) {
+    Write-Host "Installing Hardhat..." -ForegroundColor Yellow
+    npm install --save-dev hardhat
+    if ($LASTEXITCODE -ne 0) {
+        Write-Host "Error: Failed to install Hardhat" -ForegroundColor Red
+        pause
+        exit 1
+    }
+}
+
 Write-Host "Starting blockchain node..." -ForegroundColor Green
-$nodeCmd = "Write-Host 'Blockchain Node - Keep this window open!' -ForegroundColor Cyan; npm run node"
+$nodeCmd = "Write-Host 'Blockchain Node - Keep this window open!' -ForegroundColor Cyan; npx hardhat node"
 Start-Process powershell -ArgumentList "-NoExit","-Command",$nodeCmd
 
 Start-Sleep -Seconds 8
 
 Write-Host "Deploying contracts..." -ForegroundColor Green
-$deployCmd = "Write-Host 'Deploying Contracts' -ForegroundColor Cyan; npm run deploy; Read-Host 'Press Enter to close'"
+$deployCmd = "Write-Host 'Deploying Contracts' -ForegroundColor Cyan; npx hardhat run scripts/deploy.js --network localhost; Read-Host 'Press Enter to close'"
 Start-Process powershell -ArgumentList "-NoExit","-Command",$deployCmd
 
 Start-Sleep -Seconds 10
