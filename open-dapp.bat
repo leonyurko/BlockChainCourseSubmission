@@ -1,8 +1,17 @@
 @echo off
-REM Quick DApp Launcher - Batch File Version
+REM ===================================================================
+REM Complete DApp Launcher - Batch File Version
+REM ===================================================================
 REM This batch file runs the PowerShell script with execution policy bypass
+REM It will start the blockchain node, deploy contracts, and open the DApp
+REM ===================================================================
 
-echo Starting DApp launcher...
+echo.
+echo ========================================
+echo   COMPLETE DAPP LAUNCHER
+echo ========================================
+echo.
+echo Starting all services...
 echo.
 
 REM Run the PowerShell script with bypass execution policy

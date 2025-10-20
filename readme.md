@@ -21,8 +21,24 @@ npm install
 npm run compile
 ```
 
-### 3. Start Blockchain Node
-Open a **new terminal** and run:
+### 3. Launch the Complete DApp
+
+**🚀 EASY METHOD - All-in-One Launcher (Recommended):**
+
+Just run this single command:
+```powershell
+.\open-dapp.bat
+```
+
+This will automatically:
+- ✅ Start the blockchain node
+- ✅ Deploy the smart contracts
+- ✅ Start the frontend server
+- ✅ Open your browser
+
+**⚙️ MANUAL METHOD - If you prefer step-by-step:**
+
+**Terminal 1 - Start Blockchain Node:**
 ```powershell
 # Navigate to the project directory
 cd path\to\blockchainProject
@@ -30,15 +46,23 @@ npm run node
 ```
 ⚠️ **Keep this terminal open!**
 
-### 4. Deploy Contracts
-Open **another new terminal** and run:
+**Terminal 2 - Deploy Contracts:**
 ```powershell
 # Navigate to the project directory
 cd path\to\blockchainProject
 npm run deploy
 ```
 
-### 5. Configure MetaMask
+**Terminal 3 - Start Frontend:**
+```powershell
+# Navigate to the frontend directory
+cd path\to\blockchainProject\frontend
+npx http-server -p 8000
+```
+
+---
+
+### 4. Configure MetaMask
 
 **Add Localhost Network:**
 1. Open MetaMask
@@ -60,38 +84,13 @@ npm run deploy
 3. Click "Import"
 4. You now have 10,000 test ETH!
 
-### 6. Start the DApp
-Open **third terminal**:
-```powershell
-# Navigate to the frontend directory
-cd path\to\blockchainProject\frontend
-npx http-server -p 8000
-```
+### 5. Use the DApp
 
-**Or use the automated launcher (Windows only):**
+The DApp should already be open at: **http://localhost:8000**
 
-**Option A - Batch File (Recommended, no setup needed):**
-```powershell
-.\open-dapp.bat
-```
-
-**Option B - PowerShell Script:**
-```powershell
-# If you get a security error, run this first (one time only):
-Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
-Unblock-File -Path .\open-dapp.ps1
-
-# Then run the script:
-.\open-dapp.ps1
-```
-
-### 7. Open in Browser
-Go to: **http://localhost:8000**
-
-### 8. Connect Wallet
 1. Click "Connect Wallet"
 2. Approve in MetaMask
-3. Start using the DApp!
+3. Start minting and transferring NFTs!
 
 ---
 
