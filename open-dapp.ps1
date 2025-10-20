@@ -1,12 +1,25 @@
 # Quick DApp Launcher Script
 # This script opens the DApp in Chrome (or default browser) with a local server
+#
+# If you get an execution policy error, run this first:
+# Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
 
 Write-Host "Starting DApp..." -ForegroundColor Cyan
 
 # Get the script's directory and navigate to frontend
-$scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Path
+$scriptPath = if ($PSScriptRoot) { $PSScriptRoot } else { Split-Path -Parent $MyInvocation.MyCommand.Path }
 $frontendPath = Join-Path $scriptPath "frontend"
+
+# Verify frontend directory exists
+if (-not (Test-Path $frontendPath)) {
+    Write-Host "Error: Frontend directory not found at $frontendPath" -ForegroundColor Red
+    Write-Host "Please ensure you're running this script from the project root directory." -ForegroundColor Yellow
+    pause
+    exit 1
+}
+
 Set-Location $frontendPath
+Write-Host "Changed directory to: $frontendPath" -ForegroundColor Green
 
 Write-Host "Starting local HTTP server on port 8000..." -ForegroundColor Yellow
 

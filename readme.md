@@ -68,8 +68,20 @@ cd path\to\blockchainProject\frontend
 npx http-server -p 8000
 ```
 
-**Or use the automated script (Windows only):**
+**Or use the automated launcher (Windows only):**
+
+**Option A - Batch File (Recommended, no setup needed):**
 ```powershell
+.\open-dapp.bat
+```
+
+**Option B - PowerShell Script:**
+```powershell
+# If you get a security error, run this first (one time only):
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+Unblock-File -Path .\open-dapp.ps1
+
+# Then run the script:
 .\open-dapp.ps1
 ```
 
