@@ -3,8 +3,10 @@
 
 Write-Host "Starting DApp..." -ForegroundColor Cyan
 
-# Navigate to frontend directory
-Set-Location "c:\Users\Leon\Desktop\blockchainProject\frontend"
+# Get the script's directory and navigate to frontend
+$scriptPath = Split-Path -Parent $MyInvocation.MyCommand.Path
+$frontendPath = Join-Path $scriptPath "frontend"
+Set-Location $frontendPath
 
 Write-Host "Starting local HTTP server on port 8000..." -ForegroundColor Yellow
 
