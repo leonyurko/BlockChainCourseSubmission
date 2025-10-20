@@ -11,7 +11,8 @@
 
 ### 1. Install Dependencies
 ```powershell
-cd c:\Users\Leon\Desktop\blockchainProject
+# Navigate to the project directory (wherever you cloned/downloaded it)
+cd path\to\blockchainProject
 npm install
 ```
 
@@ -23,7 +24,8 @@ npm run compile
 ### 3. Start Blockchain Node
 Open a **new terminal** and run:
 ```powershell
-cd c:\Users\Leon\Desktop\blockchainProject
+# Navigate to the project directory
+cd path\to\blockchainProject
 npm run node
 ```
 ⚠️ **Keep this terminal open!**
@@ -31,7 +33,8 @@ npm run node
 ### 4. Deploy Contracts
 Open **another new terminal** and run:
 ```powershell
-cd c:\Users\Leon\Desktop\blockchainProject
+# Navigate to the project directory
+cd path\to\blockchainProject
 npm run deploy
 ```
 
@@ -60,8 +63,14 @@ npm run deploy
 ### 6. Start the DApp
 Open **third terminal**:
 ```powershell
-cd c:\Users\Leon\Desktop\blockchainProject\frontend
+# Navigate to the frontend directory
+cd path\to\blockchainProject\frontend
 npx http-server -p 8000
+```
+
+**Or use the automated script (Windows only):**
+```powershell
+.\open-dapp.ps1
 ```
 
 ### 7. Open in Browser
